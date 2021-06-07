@@ -41,7 +41,9 @@ main:   mov        output,#00h            	;LEDs dunkel schalten
 loop:   mov        A,input                	;Schalter einlesen
         
         CJNE    	A, #00000001b, loop
-        jmp        	lights                ;Endlosschleife
+        je        	input.1 = 0, lights
+        je          input.2 = 0, lightsBack ;Endlosschleife
+
 
 lights: mov  		output,#00000001b
         CALL    CMPR
@@ -92,12 +94,64 @@ lights: mov  		output,#00000001b
         CALL    CMPR
 		CALL	delay1
         jmp        lights
+        
+
+lightsBack: mov  		output,#10000000b
+        CALL    CMPR
+		CALL	delay1
+        mov        output,#11000000b
+        CALL    CMPR
+		CALL	delay1
+        mov        output,#11100000b
+        CALL    CMPR
+		CALL	delay1
+        mov        output,#11110000b
+        CALL    CMPR
+		CALL	delay1
+        mov        output,#11111000b
+        CALL    CMPR
+		CALL	delay1
+        mov        output,#11111100b
+        CALL    CMPR
+		CALL	delay1
+        mov        output,#11111110b
+        CALL    CMPR
+		CALL	delay1
+        mov        output,#11111111b
+        CALL    CMPR
+		CALL	delay1
+        mov        output,01111111b
+        CALL    CMPR
+		CALL	delay1
+        mov        output,#00111111b
+        CALL    CMPR
+		CALL	delay1
+        mov        output,#00011111b
+        CALL    CMPR
+		CALL	delay1
+        mov        output,#00001111b
+        CALL    CMPR
+		CALL	delay1
+        mov        output,#00000111b
+        CALL    CMPR
+		CALL	delay1
+        mov        output,#00000011b
+        CALL    CMPR
+		CALL	delay1
+        mov        output,#00000001b
+        CALL    CMPR
+		CALL	delay1
+        mov        output,#00000000b
+        CALL    CMPR
+		CALL	delay1
+        jmp     lightsBack
  
 ; überprüft ob stop oder pasue gedrückt wurde
 CMPR:    
         mov        	R1, input        
         JB        	input.0, pause
-        JB        	input.1, stop 
+        JB        	input.1, stop
+		JB			input.2, richtungAendern
         RET
         
 pause:  JB        	input.0, CMPR
@@ -105,6 +159,11 @@ pause:  JB        	input.0, CMPR
  
 stop:   JMP    		main
         END
+
+richtungAendern:
+		JB			input.2, richtungAendern
+
+		
 
 ; start delay
 
