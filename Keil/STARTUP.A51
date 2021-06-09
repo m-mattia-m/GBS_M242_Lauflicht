@@ -1,21 +1,4 @@
-<<<<<<< HEAD
-start:		mov A, #0
-loop:		mov p4,A
-			call wait
-			inc A
-			jmp loop
-
-wait:	mov R5, #0FFh
-wait1:	mov R6, #0FFh
-wait2:	mov R7, #0FFh
-wait3:	djnz R7, wait3
-		djnz R6, wait2
-		djnz R5, wait1
-		ret
-
-	
-=======
-																							   ;********************************************************************************
+;********************************************************************************
 ; P R O G R A M M    Vorlage
 ;********************************************************************************
 ; Source-File:      	Lauflicht.a51
@@ -197,4 +180,3 @@ loop1: DJNZ R6,loop1
 loop2: DJNZ R7,loop1
        RET
 			
->>>>>>> parent of 19e2f81 (update delay)
