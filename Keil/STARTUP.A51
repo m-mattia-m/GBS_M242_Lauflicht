@@ -37,7 +37,7 @@ init:  	    mov     WDTCN,#0DEh
             mov     XBR2,#040h            	            ; aktiviert crossbar (Koppelfeld)
  
 ;------ Hauptprogramm
-main:       mov     output,#00h            	            ;LEDs dunkel schalten
+main:       mov     output,#00h            	            ;LEDs ausschalten
 		    mov     input, #00h
 		    mov     A,#0h
 
