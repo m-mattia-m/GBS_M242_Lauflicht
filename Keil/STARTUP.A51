@@ -23,6 +23,7 @@ input    equ        P2                    	;P3 8 Eingänge
 output   equ        P3                   	;P2 8 Ausgänge
 llStatus	data	20h						; ll -> LaufLichtStatus
 dStatus		data	21h						; directionStatus -> welche richtung zuletzt
+fast		data	22h						; deklariert geschwindigkeit
  
 ;----- Intitialisierung
         ORG        0000h                	;Startadresse
@@ -41,13 +42,24 @@ main:   mov        output,#00h            	;LEDs dunkel schalten
 		mov       A,#0h
  
 loop:                   	;Schalter einlesen 
-        
-        jb      input.2, CBitBack ;Endlosschleife
+        jnb		input.2, fastFalse
+		mov		fast, #6h					; -> wert für Wait anpassen	wenn schnell
+		jmp		fastEnd
+fastFalse:
+		mov fast, #60h;	 					; -> wert für Wait anpassen wenn langsam
+fastEnd:	
+   
+        jb      input.3, CBitBack ;Endlosschleife
 		jmp		CBit
 
 
 lightsUp: 
 		CALL 	CMPR
+		jnb		input.4, lightsUpTrue
+		rl		A
+		add 	A, #1h
+
+lightsUpTrue:
 		rl		A
 		add 	A, #1h
 		mov		output, A
@@ -56,6 +68,11 @@ lightsUp:
 
 lightsDown:	
 		CALL 	CMPR
+		jnb		input.4, lightsDownTrue
+		rl		A
+		subb 	A, #1h
+
+lightsDownTrue:
 		rl		A
 		subb 	A, #1h
 		mov		output, A
@@ -65,6 +82,11 @@ lightsDown:
 
 lightsUpBack: 
 		CALL 	CMPR
+		jnb		input.4, lightsUpBackTrue
+		add 	A, #1h
+		rr		A
+
+lightsUpBackTrue:
 		add 	A, #1h
 		rr		A
 		mov		output, A
@@ -73,6 +95,11 @@ lightsUpBack:
 
 lightsDownBack:	
 		CALL 	CMPR
+		jnb		input.4, lightsDownBackTrue
+		subb 	A, #1h 
+		rr		A
+
+lightsDownBackTrue:
 		subb 	A, #1h 
 		rr		A
 		mov		output, A
@@ -109,7 +136,7 @@ CBitBackTrue:
 wait:   mov R5, #0FFh		   
 wait1:  mov R6, #0FFh
 wait2:  mov R7, #05h
-wait3:	mov R4, #01h			; bei Mesa wait 4 wieder entfernen
+wait3:	mov R4, fast			; bei Mesa wait 4 wieder entfernen
 wait4:  djnz R4, wait4
 		djnz R7, wait3
         djnz R6, wait2
