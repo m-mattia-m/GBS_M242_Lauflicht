@@ -165,7 +165,7 @@ richtungAendern:
 
 ; start delay
 
-wait:   mov R5, #0FFh
+wait:   mov R5, #0FFh		   
 wait1:  mov R6, #0FFh
 wait2:  mov R7, #0FFh
 wait3:  djnz R7, wait3
