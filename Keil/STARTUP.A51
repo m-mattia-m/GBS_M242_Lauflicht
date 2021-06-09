@@ -6,7 +6,7 @@ loop:		mov p4,A
 
 wait:	mov R5, #0FFh
 wait1:	mov R6, #0FFh
-wait2:	mov R7, #07h
+wait2:	mov R7, #0FFh
 wait3:	djnz R7, wait3
 		djnz R6, wait2
 		djnz R5, wait1
