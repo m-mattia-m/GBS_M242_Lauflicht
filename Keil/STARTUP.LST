@@ -1,4 +1,4 @@
-A51 MACRO ASSEMBLER  VORLAGE                                                              06/03/2021 18:16:17 PAGE     1
+A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/09/2021 19:36:39 PAGE     1
 
 
 MACRO ASSEMBLER A51 V8.00
@@ -7,95 +7,131 @@ ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE STARTUP.A51 SET(SMALL) DEBUG EP
 
 LOC  OBJ            LINE     SOURCE
 
-                       1                                                                                                
-                                                                                                                        
-                                  ;********************************************************************************
+                       1     ;********************************************************************************
                        2     ; P R O G R A M M    Vorlage
                        3     ;********************************************************************************
-                       4     ; Source-File:        Vorlage.a51
-                       5     ; Autor:            Erwin Wohler
-                       6     ; Datum:            31.01.2013
-                       7     ; Version:            1.0
-                       8     ; Beschreibung:        Gibt Zustand der Schalter an die LEDs aus
-                       9     ; Eingaben:            8 Schalter S0 bis S7
-                      10     ; Ausgaben:            8 LEDs PA0 bis PA7
+                       4     ; Source-File:          Lauflicht.a51
+                       5     ; Autor:                Kay Wild, Christophe Damas, Mattia Müggler
+                       6     ; Datum:                05.06.2021
+                       7     ; Version:              1.0
+                       8     ; Beschreibung:         Lauflicht
+                       9     ; Eingaben:             8 Schalter S0 bis S7
+                      10     ; Ausgaben:             8 LEDs PA0 bis PA7
                       11     ;********************************************************************************
                       12          
-                      13     $title  (Vorlage)
+                      13     $title  (Lauflicht)
                      252     $list 
                      253      
-                     254     NAME Vorlage
+                     254     NAME Lauflicht
                      255      
                      256     ;----- Deklarationen
-  00B0               257     input    equ        P3                    ;P3 8 Eingänge
-  00A0               258     output    equ        P2                    ;P2 8 Ausgänge
-                     259      
-                     260     ;----- Intitialisierung
-0000                 261             ORG        0000h                ;Startadresse
-0000 2100            262             jmp        init
-                     263      
-0100                 264             ORG        0100h                ;Programmanfang
-0100 75FFDE          265     init:      mov        WDTCN,#0DEh
-0103 75FFAD          266             mov        WDTCN,#0ADh            ;disable Watchdog
-0106 75A6FF          267               mov        P2MDOUT,#0FFh        ;P2 8 Ausgänge push/pull
-0109 75A700          268             mov        P3MDOUT,#000h        ;P3 8 Eingänge
-010C 75E340          269             mov        XBR2,#040h            ;enable crossbar (Koppelfeld)
-                     270      
-                     271     ;------ Hauptprogramm
-010F 75A000          272     main:    mov        output,#00h            ;LEDs dunkel schalten
-                     273      
-0112 E5B0            274     loop:    mov        A,input                ;Schalter einlesen
-                     275             
-0114 B401FB          276             CJNE    A, #00000001b, loop
-0117 8000            277             jmp        lights                ;Endlosschleife
-0119 75A001          278     lights:    mov        output,#00000001b
-011C 316B            279             CALL    CMPR
-011E 75A003          280             mov        output,#00000011b
-0121 316B            281             CALL    CMPR
-0123 75A007          282             mov        output,#00000111b
-0126 316B            283             CALL    CMPR
-0128 75A00F          284             mov        output,#00001111b
-012B 316B            285             CALL    CMPR
-012D 75A01F          286             mov        output,#00011111b
-0130 316B            287             CALL    CMPR
-0132 75A03F          288             mov        output,#00111111b
-0135 316B            289             CALL    CMPR
-0137 75A07F          290             mov        output,#01111111b
-013A 316B            291             CALL    CMPR
-013C 75A0FF          292             mov        output,#11111111b
-013F 316B            293             CALL    CMPR
-0141 75A0FE          294             mov        output,#11111110b
-A51 MACRO ASSEMBLER  VORLAGE                                                              06/03/2021 18:16:17 PAGE     2
+  00A0               257     input    equ        P2                          ;P3 8 Eingänge
+  00B0               258     output   equ        P3                          ;P2 8 Ausgänge
+  0020               259     llStatus        data    20h                                             ; ll -> LaufLichtSt
+                             atus
+  0021               260     dStatus         data    21h                                             ; directionStatus -
+                             > welche richtung zuletzt
+                     261      
+                     262     ;----- Intitialisierung
+0000                 263             ORG        0000h                        ;Startadresse
+0000 2100            264             jmp        init
+                     265      
+0100                 266             ORG             0100h                   ;Programmanfang
+0100 75FFDE          267     init:   mov             WDTCN,#0DEh
+0103 75FFAD          268             mov             WDTCN,#0ADh             ;disable Watchdog
+0106 75A6FF          269             mov             P2MDOUT,#0FFh           ;P2 8 Ausgänge push/pull
+0109 75A700          270             mov             P3MDOUT,#000h           ;P3 8 Eingänge
+010C 75E340          271             mov             XBR2,#040h              ;enable crossbar (Koppelfeld)
+                     272      
+                     273     ;------ Hauptprogramm
+010F 75B000          274     main:   mov        output,#00h                  ;LEDs dunkel schalten
+0112 75A000          275                     mov                     input, #00h
+0115 7400            276                     mov       A,#0h
+                     277      
+0117                 278     loop:                           ;Schalter einlesen 
+                     279             
+0117 20A244          280             jb      input.2, CBitBack ;Endlosschleife
+011A 8033            281                     jmp             CBit
+                     282     
+                     283     
+011C                 284     lightsUp: 
+011C 3148            285                     CALL    CMPR
+011E 23              286                     rl              A
+011F 2401            287                     add     A, #1h
+0121 F5B0            288                     mov             output, A
+0123 316D            289                     CALL    wait
+0125 80F0            290                     jmp             loop
+                     291     
+0127                 292     lightsDown:     
+0127 3148            293                     CALL    CMPR
+0129 23              294                     rl              A
+A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/09/2021 19:36:39 PAGE     2
 
-0144 316B            295             CALL    CMPR
-0146 75A0FC          296             mov        output,#11111100b
-0149 316B            297             CALL    CMPR
-014B 75A0F8          298             mov        output,#11111000b
-014E 316B            299             CALL    CMPR
-0150 75A0F0          300             mov        output,#11110000b
-0153 316B            301             CALL    CMPR
-0155 75A0E0          302             mov        output,#11100000b
-0158 316B            303             CALL    CMPR
-015A 75A0C0          304             mov        output,#11000000b
-015D 316B            305             CALL    CMPR
-015F 75A080          306             mov        output,#10000000b
-0162 316B            307             CALL    CMPR
-0164 75A000          308             mov        output,#00000000b
-0167 316B            309             CALL    CMPR
-0169 80AE            310             jmp        lights
-                     311      
-016B                 312     CMPR:    
-016B A9B0            313             mov        R1, input        
-016D 20B004          314             JB        input.0, pause
-0170 20B106          315             JB        input.1, stop 
-0173 22              316             RET
-                     317             
-0174 20B0F4          318     pause:    JB        input.0, CMPR
-0177 80FB            319             JMP        pause                
-                     320      
-0179 8094            321     stop:    JMP    main
-                     322             END
-A51 MACRO ASSEMBLER  VORLAGE                                                              06/03/2021 18:16:17 PAGE     3
+012A 9401            295                     subb    A, #1h
+012C F5B0            296                     mov             output, A
+012E 316D            297                     CALL    wait
+0130 80E5            298                     jmp             loop
+                     299     
+                     300     
+0132                 301     lightsUpBack: 
+0132 3148            302                     CALL    CMPR
+0134 2401            303                     add     A, #1h
+0136 03              304                     rr              A
+0137 F5B0            305                     mov             output, A
+0139 316D            306                     CALL    wait
+013B 80DA            307                     jmp             loop
+                     308     
+013D                 309     lightsDownBack: 
+013D 3148            310                     CALL    CMPR
+013F 9401            311                     subb    A, #1h 
+0141 03              312                     rr              A
+0142 F5B0            313                     mov             output, A
+0144 316D            314                     CALL    wait
+0146 80CF            315                     jmp             loop
+                     316      
+                     317     ; überprüft ob stop oder pasue gedrückt wurde
+0148                 318     CMPR:           
+0148 20A0FD          319             JB              input.0, CMPR
+014B 20A130          320             JB              input.1, reset
+014E 22              321             RET
+                     322     
+014F 200805          323     CBit:   jb              dStatus.0, CBitTrue
+0152 7400            324                     mov     A, #0h
+0154 752101          325                     mov             dStatus, #1h
+                     326     
+0157                 327     CBitTrue:       
+0157 F520            328                     mov             llStatus, A
+0159 2007CB          329                     jb              llStatus.7, lightsDown
+015C 80BE            330                     jmp     lightsUp 
+                     331     
+015E 300805          332     CBitBack:       jnb dStatus.0, CBitBackTrue
+0161 7400            333                             mov     A, #0h
+0163 752100          334                             mov             dStatus, #0h
+                     335                             
+                     336     
+0166                 337     CBitBackTrue:
+0166 F520            338                             mov llStatus, A
+0168 2000D2          339                             jb llStatus.0, lightsDownBack
+016B 80C5            340                             jmp     lightsUpBack     
+                     341     
+                     342     ; start delay
+                     343     
+016D 7DFF            344     wait:   mov R5, #0FFh              
+016F 7EFF            345     wait1:  mov R6, #0FFh
+0171 7F05            346     wait2:  mov R7, #05h
+0173 7C01            347     wait3:  mov R4, #01h                    ; bei Mesa wait 4 wieder entfernen
+0175 DCFE            348     wait4:  djnz R4, wait4
+0177 DFFA            349                     djnz R7, wait3
+0179 DEF6            350             djnz R6, wait2
+017B DDF2            351             djnz R5, wait1
+017D 22              352             ret
+                     353     
+                     354     
+017E 75B000          355     reset:   mov        output,#00h 
+0181 7400            356                     mov     A, #0h
+0183 8092            357                     jmp loop
+                     358             END
+A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/09/2021 19:36:39 PAGE     3
 
 SYMBOL TABLE LISTING
 ------ ----- -------
@@ -130,6 +166,10 @@ AMX0SL . . . . . .  D ADDR   00BBH   A
 AMX1SL . . . . . .  D ADDR   00ACH   A   
 B. . . . . . . . .  D ADDR   00F0H   A   
 BUSY . . . . . . .  B ADDR   00C0H.7 A   
+CBIT . . . . . . .  C ADDR   014FH   A   
+CBITBACK . . . . .  C ADDR   015EH   A   
+CBITBACKTRUE . . .  C ADDR   0166H   A   
+CBITTRUE . . . . .  C ADDR   0157H   A   
 CCF0 . . . . . . .  B ADDR   00D8H.0 A   
 CCF1 . . . . . . .  B ADDR   00D8H.1 A   
 CCF2 . . . . . . .  B ADDR   00D8H.2 A   
@@ -137,7 +177,7 @@ CCF3 . . . . . . .  B ADDR   00D8H.3 A
 CCF4 . . . . . . .  B ADDR   00D8H.4 A   
 CF . . . . . . . .  B ADDR   00D8H.7 A   
 CKCON. . . . . . .  D ADDR   008EH   A   
-CMPR . . . . . . .  C ADDR   016BH   A   
+CMPR . . . . . . .  C ADDR   0148H   A   
 CPRL2. . . . . . .  B ADDR   00C8H.0 A   
 CPT0CN . . . . . .  D ADDR   009EH   A   
 CPT1CN . . . . . .  D ADDR   009FH   A   
@@ -152,19 +192,20 @@ DAC1H. . . . . . .  D ADDR   00D6H   A
 DAC1L. . . . . . .  D ADDR   00D5H   A   
 DPH. . . . . . . .  D ADDR   0083H   A   
 DPL. . . . . . . .  D ADDR   0082H   A   
+DSTATUS. . . . . .  D ADDR   0021H   A   
 EA . . . . . . . .  B ADDR   00A8H.7 A   
 EIE1 . . . . . . .  D ADDR   00E6H   A   
 EIE2 . . . . . . .  D ADDR   00E7H   A   
 EIP1 . . . . . . .  D ADDR   00F6H   A   
 EIP2 . . . . . . .  D ADDR   00F7H   A   
 EMI0CF . . . . . .  D ADDR   00A3H   A   
+A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/09/2021 19:36:39 PAGE     4
+
 EMI0CN . . . . . .  D ADDR   00AFH   A   
 EMI0TC . . . . . .  D ADDR   00A1H   A   
 ENSMB. . . . . . .  B ADDR   00C0H.6 A   
 ES0. . . . . . . .  B ADDR   00A8H.4 A   
 ET0. . . . . . . .  B ADDR   00A8H.1 A   
-A51 MACRO ASSEMBLER  VORLAGE                                                              06/03/2021 18:16:17 PAGE     4
-
 ET1. . . . . . . .  B ADDR   00A8H.3 A   
 ET2. . . . . . . .  B ADDR   00A8H.5 A   
 EX0. . . . . . . .  B ADDR   00A8H.0 A   
@@ -179,18 +220,23 @@ IE . . . . . . . .  D ADDR   00A8H   A
 IE0. . . . . . . .  B ADDR   0088H.1 A   
 IE1. . . . . . . .  B ADDR   0088H.3 A   
 INIT . . . . . . .  C ADDR   0100H   A   
-INPUT. . . . . . .  D ADDR   00B0H   A   
+INPUT. . . . . . .  D ADDR   00A0H   A   
 IP . . . . . . . .  D ADDR   00B8H   A   
 IT0. . . . . . . .  B ADDR   0088H.0 A   
 IT1. . . . . . . .  B ADDR   0088H.2 A   
-LIGHTS . . . . . .  C ADDR   0119H   A   
-LOOP . . . . . . .  C ADDR   0112H   A   
+LAUFLICHT. . . . .  N NUMB   -----       
+LIGHTSDOWN . . . .  C ADDR   0127H   A   
+LIGHTSDOWNBACK . .  C ADDR   013DH   A   
+LIGHTSUP . . . . .  C ADDR   011CH   A   
+LIGHTSUPBACK . . .  C ADDR   0132H   A   
+LLSTATUS . . . . .  D ADDR   0020H   A   
+LOOP . . . . . . .  C ADDR   0117H   A   
 MAIN . . . . . . .  C ADDR   010FH   A   
 MODF . . . . . . .  B ADDR   00F8H.5 A   
 MSTEN. . . . . . .  B ADDR   00F8H.1 A   
 OSCICN . . . . . .  D ADDR   00B2H   A   
 OSCXCN . . . . . .  D ADDR   00B1H   A   
-OUTPUT . . . . . .  D ADDR   00A0H   A   
+OUTPUT . . . . . .  D ADDR   00B0H   A   
 OV . . . . . . . .  B ADDR   00D0H.2 A   
 P. . . . . . . . .  B ADDR   00D0H.0 A   
 P0 . . . . . . . .  D ADDR   0080H   A   
@@ -208,7 +254,6 @@ P5 . . . . . . . .  D ADDR   0085H   A
 P6 . . . . . . . .  D ADDR   0086H   A   
 P7 . . . . . . . .  D ADDR   0096H   A   
 P74OUT . . . . . .  D ADDR   00B5H   A   
-PAUSE. . . . . . .  C ADDR   0174H   A   
 PCA0CN . . . . . .  D ADDR   00D8H   A   
 PCA0CPH0 . . . . .  D ADDR   00FAH   A   
 PCA0CPH1 . . . . .  D ADDR   00FBH   A   
@@ -222,6 +267,8 @@ PCA0CPL3 . . . . .  D ADDR   00EDH   A
 PCA0CPL4 . . . . .  D ADDR   00EEH   A   
 PCA0CPM0 . . . . .  D ADDR   00DAH   A   
 PCA0CPM1 . . . . .  D ADDR   00DBH   A   
+A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/09/2021 19:36:39 PAGE     5
+
 PCA0CPM2 . . . . .  D ADDR   00DCH   A   
 PCA0CPM3 . . . . .  D ADDR   00DDH   A   
 PCA0CPM4 . . . . .  D ADDR   00DEH   A   
@@ -231,8 +278,6 @@ PCA0MD . . . . . .  D ADDR   00D9H   A
 PCON . . . . . . .  D ADDR   0087H   A   
 PS . . . . . . . .  B ADDR   00B8H.4 A   
 PSCTL. . . . . . .  D ADDR   008FH   A   
-A51 MACRO ASSEMBLER  VORLAGE                                                              06/03/2021 18:16:17 PAGE     5
-
 PSW. . . . . . . .  D ADDR   00D0H   A   
 PT0. . . . . . . .  B ADDR   00B8H.1 A   
 PT1. . . . . . . .  B ADDR   00B8H.3 A   
@@ -247,6 +292,7 @@ RCAP4L . . . . . .  D ADDR   00E4H   A
 RCLK0. . . . . . .  B ADDR   00C8H.5 A   
 REF0CN . . . . . .  D ADDR   00D1H   A   
 REN0 . . . . . . .  B ADDR   0098H.4 A   
+RESET. . . . . . .  C ADDR   017EH   A   
 RI0. . . . . . . .  B ADDR   0098H.0 A   
 RS0. . . . . . . .  B ADDR   00D0H.3 A   
 RS1. . . . . . . .  B ADDR   00D0H.4 A   
@@ -281,7 +327,6 @@ SPIEN. . . . . . .  B ADDR   00F8H.0 A
 SPIF . . . . . . .  B ADDR   00F8H.7 A   
 STA. . . . . . . .  B ADDR   00C0H.5 A   
 STO. . . . . . . .  B ADDR   00C0H.4 A   
-STOP . . . . . . .  C ADDR   0179H   A   
 T2CON. . . . . . .  D ADDR   00C8H   A   
 T4CON. . . . . . .  D ADDR   00C9H   A   
 TB80 . . . . . . .  B ADDR   0098H.3 A   
@@ -290,6 +335,8 @@ TCON . . . . . . .  D ADDR   0088H   A
 TF0. . . . . . . .  B ADDR   0088H.5 A   
 TF1. . . . . . . .  B ADDR   0088H.7 A   
 TF2. . . . . . . .  B ADDR   00C8H.7 A   
+A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/09/2021 19:36:39 PAGE     6
+
 TH0. . . . . . . .  D ADDR   008CH   A   
 TH1. . . . . . . .  D ADDR   008DH   A   
 TH2. . . . . . . .  D ADDR   00CDH   A   
@@ -299,8 +346,6 @@ TL0. . . . . . . .  D ADDR   008AH   A
 TL1. . . . . . . .  D ADDR   008BH   A   
 TL2. . . . . . . .  D ADDR   00CCH   A   
 TL4. . . . . . . .  D ADDR   00F4H   A   
-A51 MACRO ASSEMBLER  VORLAGE                                                              06/03/2021 18:16:17 PAGE     6
-
 TMOD . . . . . . .  D ADDR   0089H   A   
 TMR3CN . . . . . .  D ADDR   0091H   A   
 TMR3H. . . . . . .  D ADDR   0095H   A   
@@ -311,7 +356,11 @@ TR0. . . . . . . .  B ADDR   0088H.4 A
 TR1. . . . . . . .  B ADDR   0088H.6 A   
 TR2. . . . . . . .  B ADDR   00C8H.2 A   
 TXBSY. . . . . . .  B ADDR   00F8H.3 A   
-VORLAGE. . . . . .  N NUMB   -----       
+WAIT . . . . . . .  C ADDR   016DH   A   
+WAIT1. . . . . . .  C ADDR   016FH   A   
+WAIT2. . . . . . .  C ADDR   0171H   A   
+WAIT3. . . . . . .  C ADDR   0173H   A   
+WAIT4. . . . . . .  C ADDR   0175H   A   
 WCOL . . . . . . .  B ADDR   00F8H.6 A   
 WDTCN. . . . . . .  D ADDR   00FFH   A   
 XBR0 . . . . . . .  D ADDR   00E1H   A   

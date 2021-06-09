@@ -21,6 +21,8 @@ NAME Lauflicht
 ;----- Deklarationen
 input    equ        P2                    	;P3 8 Eingänge
 output   equ        P3                   	;P2 8 Ausgänge
+llStatus	data	20h						; ll -> LaufLichtStatus
+dStatus		data	21h						; directionStatus -> welche richtung zuletzt
  
 ;----- Intitialisierung
         ORG        0000h                	;Startadresse
@@ -35,140 +37,87 @@ init:  	mov        	WDTCN,#0DEh
  
 ;------ Hauptprogramm
 main:   mov        output,#00h            	;LEDs dunkel schalten
+		mov			input, #00h
+		mov       A,#0h
  
-loop:   mov        A,input                	;Schalter einlesen
+loop:                   	;Schalter einlesen 
         
-        CJNE    	A, #00000001b, loop
-        je        	input.1 = 0, lights
-        je          input.2 = 0, lightsBack ;Endlosschleife
+        jb      input.2, CBitBack ;Endlosschleife
+		jmp		CBit
 
 
-lights: mov  		output,#00000001b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#00000011b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#00000111b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#00001111b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#00011111b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#00111111b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#01111111b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#11111111b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#11111110b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#11111100b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#11111000b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#11110000b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#11100000b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#11000000b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#10000000b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#00000000b
-        CALL    CMPR
-		CALL	wait
-        jmp        lights
-        
+lightsUp: 
+		CALL 	CMPR
+		rl		A
+		add 	A, #1h
+		mov		output, A
+		CALL 	wait
+		jmp		loop
 
-lightsBack: mov  		output,#10000000b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#11000000b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#11100000b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#11110000b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#11111000b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#11111100b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#11111110b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#11111111b
-        CALL    CMPR
-		CALL	wait
-        mov        output,01111111b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#00111111b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#00011111b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#00001111b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#00000111b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#00000011b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#00000001b
-        CALL    CMPR
-		CALL	wait
-        mov        output,#00000000b
-        CALL    CMPR
-		CALL	wait
-        jmp     lightsBack
+lightsDown:	
+		CALL 	CMPR
+		rl		A
+		subb 	A, #1h
+		mov		output, A
+		CALL 	wait
+		jmp		loop
+
+
+lightsUpBack: 
+		CALL 	CMPR
+		add 	A, #1h
+		rr		A
+		mov		output, A
+		CALL 	wait
+		jmp		loop
+
+lightsDownBack:	
+		CALL 	CMPR
+		subb 	A, #1h 
+		rr		A
+		mov		output, A
+		CALL 	wait
+		jmp		loop
  
 ; überprüft ob stop oder pasue gedrückt wurde
-CMPR:    
-        mov        	R1, input        
-        JB        	input.0, pause
-        JB        	input.1, stop
-		JB			input.2, richtungAendern
+CMPR:           
+        JB        	input.0, CMPR
+        JB        	input.1, reset
         RET
-        
-pause:  JB        	input.0, CMPR
-       	JMP        	pause                
- 
-stop:   JMP    		main
-        END
 
-richtungAendern:
-		JB			input.2, richtungAendern
+CBit:	jb		dStatus.0, CBitTrue
+		mov 	A, #0h
+		mov		dStatus, #1h
 
-		
+CBitTrue:	
+		mov		llStatus, A
+		jb		llStatus.7, lightsDown
+		jmp 	lightsUp 
+
+CBitBack:	jnb dStatus.0, CBitBackTrue
+			mov 	A, #0h
+			mov		dStatus, #0h
+			
+
+CBitBackTrue:
+			mov llStatus, A
+			jb llStatus.0, lightsDownBack
+			jmp	lightsUpBack	 
 
 ; start delay
 
 wait:   mov R5, #0FFh		   
 wait1:  mov R6, #0FFh
-wait2:  mov R7, #0FFh
-wait3:  djnz R7, wait3
+wait2:  mov R7, #05h
+wait3:	mov R4, #01h			; bei Mesa wait 4 wieder entfernen
+wait4:  djnz R4, wait4
+		djnz R7, wait3
         djnz R6, wait2
         djnz R5, wait1
         ret
+
+
+reset:   mov        output,#00h 
+		mov	A, #0h
+		jmp loop
+        END
