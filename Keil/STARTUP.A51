@@ -8,6 +8,8 @@
 ; Beschreibung:        	Lauflicht
 ; Eingaben:            	8 Schalter S0 bis S7
 ; Ausgaben:            	8 LEDs PA0 bis PA7
+; HINWEIS				Alle Änderungen die noch für das Mesa gemacht werden  
+;						müssen, sind mit dem Keywort "ÄNDERN" gekennzeichnet
 ;********************************************************************************
      
 $TITLE (Lauflicht)
@@ -38,17 +40,17 @@ init:  	    mov     WDTCN,#0DEh
  
 ;------ Hauptprogramm
 main:       mov     output,#00h            	            ;LEDs ausschalten
-		    mov     input, #00h
+		    mov     input, #00h							; ÄNDERN --> wenn man es auf dem Mesa laufen lässt muss man diese Zeile entfernen
 		    mov     A,#0h
 
 ;------ Schleife
 loop:
             jnb		input.2, fastFalse
-		    mov		fast, #6h					        ; noch ÄNDERN --> wert für Wait anpassen wenn schnell
+		    mov		fast, #6h					        ; ÄNDERN --> Wert für Wait anpassen wenn schnell -> beim Mesa #6h mit #1h ersetzen
 		    jmp		fastEnd
             
 fastFalse:
-		    mov     fast, #60h;	 					    ; noch ÄNDERN --> wert für Wait anpassen wenn langsam
+		    mov     fast, #60h;	 					    ; ÄNDERN --> Wert für Wait anpassen wenn langsam (standard-geschwindigkeit) -> beim Mesa #60h mit #6h ersetzen
 
 fastEnd:	
    
@@ -149,7 +151,7 @@ CBitBackTrue:
 wait:       mov     R5, #0FFh		                    ; mit wait wird der Delay aufgerufen, und hier wird auf das Register verschiedene Werte gesetzt und Schleifen ineinander aufgerufen
 wait1:      mov     R6, #0FFh
 wait2:      mov     R7, #05h
-wait3:	    mov     R4, fast			                ; noch ÄNDERN --> bei Mesa wait 4 wieder entfernen
+wait3:	    mov     R4, fast			                ; ÄNDERN --> bei Mesa wait 4 wieder entfernen und "mov R4, fast" beim wait 3
 wait4:      djnz    R4, wait4
 		    djnz    R7, wait3
             djnz    R6, wait2

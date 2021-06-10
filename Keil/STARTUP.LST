@@ -1,4 +1,4 @@
-A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/09/2021 21:13:15 PAGE     1
+A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/10/2021 10:48:00 PAGE     1
 
 
 MACRO ASSEMBLER A51 V8.00
@@ -47,8 +47,9 @@ LOC  OBJ            LINE     SOURCE
                              d)
                      273      
                      274     ;------ Hauptprogramm
-010F 75A000          275     main:       mov     output,#00h                             ;LEDs dunkel schalten
-0112 75B000          276                         mov     input, #00h
+010F 75A000          275     main:       mov     output,#00h                             ;LEDs ausschalten
+0112 75B000          276                         mov     input, #00h                                                 ; w
+                             enn man es auf dem Mesa aufenlässt muss man diese Zeile entfernen
 0115 7400            277                         mov     A,#0h
                      278     
                      279     ;------ Schleife
@@ -64,9 +65,9 @@ LOC  OBJ            LINE     SOURCE
                      287     
 0122                 288     fastEnd:        
                      289        
-0122 20B35C          290                 jb      input.3, CBitBack ;Endlosschleife
-A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/09/2021 21:13:15 PAGE     2
+A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/10/2021 10:48:00 PAGE     2
 
+0122 20B35C          290                 jb      input.3, CBitBack ;Endlosschleife
 0125 804B            291                         jmp         CBit
                      292     
                      293     ;------ Licht anschalten Vorwärts
@@ -132,9 +133,9 @@ LOC  OBJ            LINE     SOURCE
                      353     ;----- überprüft ob stop oder pasue gedrückt wurde
 016B                 354     compare:           
 016B 20B0FD          355                 JB      input.0, compare
-016E 20B130          356                 JB      input.1, reset
-A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/09/2021 21:13:15 PAGE     3
+A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/10/2021 10:48:00 PAGE     3
 
+016E 20B130          356                 JB      input.1, reset
 0171 22              357                 RET
                      358     
                      359     ;----- überprüft Richtung und wenn Schalter gedrückt geht zu CBitTrue (Wenn Vorwärts)
@@ -180,7 +181,7 @@ LOC  OBJ            LINE     SOURCE
 01A4 7400            396                         mov     A, #0h
 01A6 2117            397                         jmp     loop
                      398                 END
-A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/09/2021 21:13:15 PAGE     4
+A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/10/2021 10:48:00 PAGE     4
 
 SYMBOL TABLE LISTING
 ------ ----- -------
@@ -248,7 +249,7 @@ EIE2 . . . . . . .  D ADDR   00E7H   A
 EIP1 . . . . . . .  D ADDR   00F6H   A   
 EIP2 . . . . . . .  D ADDR   00F7H   A   
 EMI0CF . . . . . .  D ADDR   00A3H   A   
-A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/09/2021 21:13:15 PAGE     5
+A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/10/2021 10:48:00 PAGE     5
 
 EMI0CN . . . . . .  D ADDR   00AFH   A   
 EMI0TC . . . . . .  D ADDR   00A1H   A   
@@ -316,7 +317,7 @@ PCA0CPH1 . . . . .  D ADDR   00FBH   A
 PCA0CPH2 . . . . .  D ADDR   00FCH   A   
 PCA0CPH3 . . . . .  D ADDR   00FDH   A   
 PCA0CPH4 . . . . .  D ADDR   00FEH   A   
-A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/09/2021 21:13:15 PAGE     6
+A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/10/2021 10:48:00 PAGE     6
 
 PCA0CPL0 . . . . .  D ADDR   00EAH   A   
 PCA0CPL1 . . . . .  D ADDR   00EBH   A   
@@ -384,7 +385,7 @@ SPIF . . . . . . .  B ADDR   00F8H.7 A
 STA. . . . . . . .  B ADDR   00C0H.5 A   
 STO. . . . . . . .  B ADDR   00C0H.4 A   
 T2CON. . . . . . .  D ADDR   00C8H   A   
-A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/09/2021 21:13:15 PAGE     7
+A51 MACRO ASSEMBLER  LAUFLICHT                                                            06/10/2021 10:48:00 PAGE     7
 
 T4CON. . . . . . .  D ADDR   00C9H   A   
 TB80 . . . . . . .  B ADDR   0098H.3 A   
